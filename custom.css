@@ -1,0 +1,28 @@
+:root {
+    --accent: #F7931A;
+    --marked:var(--accent)
+}
+
+html {
+    scroll-behavior: auto;
+}
+
+/* Add hashtag links within the page */
+a[id][href^="#"] {
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+}
+
+a[id][href^="#"]::after {
+  content: "#";
+  opacity: 0;
+  margin-left: 0.4em;
+  font-size: 0.85em;
+  transition: opacity 0.15s ease;
+}
+
+a[id][href^="#"]:hover::after,
+a[id][href^="#"]:focus::after {
+  opacity: 1;
+}
