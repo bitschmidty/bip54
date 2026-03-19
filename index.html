@@ -90,7 +90,7 @@
 							<h4>Variants</h4>
 							<p>The <a href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710/27"><strong>Murch-Zawy timewarp variant</strong></a> circumvents the above rule by setting the end timestamps of 2 difficulty periods several weeks into the future to achieve a greater decrease in difficulty by the time the chain is accepted. To unsure the chain is eventually accepted by the wider network and doesn't always have timestamps too far in the future, this attack has to alternate with 1 difficulty period which is closer to the real time, thereby increasing the difficulty momentarily. It therefore takes longer to drain the subsidy.</p>
 							<p>BIP54 also addresses this variant through requiring that the timestamp of the last block in a difficulty period must be greater than (or equal to) the timestamp of the first block in the same period.</p>
-							<p>Since in any case, nodes will follow the chain with most cumulative PoW, the attacks above both require 51% control of hashrate. The even if blocks were produced at a higher rate in one fork, the preference for highest cumulative PoW still imposes this constraint on an attacker. These new rules limit the damage that can be inflicted, should an attacker control 51% of the hashrate during a few weeks/months.</p>
+							<p>Since in any case, nodes will follow the chain with most cumulative PoW, the attacks above both require 51% control of hashrate. Even if blocks were produced at a higher rate in one fork, the preference for highest cumulative PoW still imposes this constraint on an attacker. These new rules limit the damage that can be inflicted, should an attacker control 51% of the hashrate during a few weeks/months.</p>
 						</div>
 					</details>
 				</p>
@@ -124,7 +124,7 @@
 							<h4>BIP54's fix</h4>
 							<p>BIP54 introduces a <strong>per-transaction limit of 2,500 legacy sigops</strong>. This is a conservative limit since normal transactions use far fewer sigops. Even then, reaching this limit requires a transaction that deliberately inflates validation costs, which is the behavior this fix aims to prevent.</p>
 							<p>The fix reduces worst-case block validation time by approximately <strong>40x</strong> while minimizing the risk of confiscating coins locked in unusual legacy scripts. Bitcoin Core has already made transactions exceeding this limit <a href="https://bitcoinops.org/en/newsletters/2025/07/25/#bitcoin-core-32521">non-standard</a> as a forward-compatibility measure, and the <a href="https://bitcoinops.org/en/newsletters/2025/05/16/#bitcoin-core-32155">internal miner</a> has been updated to comply.</p>
-							<p>SegWit transactions, which represent approximately 90% of Bitcoin traffic, are not affected by this issue because they already have separate, stricter sigops accounting rules and don’t suffer from the quadratic hashing issue.</p>
+							<p>SegWit transactions, which represent approximately 90% of Bitcoin traffic, are not affected by this issue because they already have separate, stricter sigops accounting rules and don’t suffer from the quadratic hashing issue. Their standardized scriptPubKey formats are all quite few bytes (P2WPKH, P2WSH, P2TR, P2A) and relegate any actual sigops to the witness data of the currently processed block, meaning they already counted toward the block-level 80,000 limit.</p>
 						</div>
 					</details>
 				</p>
