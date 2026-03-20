@@ -578,7 +578,7 @@
 		<section>
 			<h2><a href="#resources" id="resources">Resources</a></h2>
 
-			<h3>Summaries</h3>
+			<h3><a href="#resources-summaries" id="resources-summaries">Summaries</a></h3>
 			<ul>
 				<li><a
 				href="https://bitcoinmagazine.com/print/the-core-issue-consensus-cleanup">The
@@ -600,7 +600,7 @@
 				href="https://www.bitmex.com/blog/attack-blocks">Attack Blocks</a> - BitMEX Research</li>
 			</ul>
 
-			<h3>Specification</h3>
+			<h3><a href="#resources-specification" id="resources-specification">Specification</a></h3>
 			<ul>
 				<li><a
 				href="https://github.com/bitcoin/bips/blob/master/bip-0054.md">BIP54</a>
@@ -612,14 +612,28 @@
 				Improvement Proposals repository</li>
 			</ul>
 
-			<h3>Mailing list posts</h3>
+			<h3><a href="#resources-mailing-list" id="resources-mailing-list">Mailing list posts</a></h3>
 			<ul>
 				<li><a
 				href="https://groups.google.com/g/bitcoindev/c/wOVjJoLDWfA/m/zWcDG7_7CQAJ">BIP
 				54 live on Bitcoin Inquisition</a> (February 2026)</li>
 				<li><a
+				href="https://groups.google.com/g/bitcoindev/c/znBz5MA7_Bo/m/RVVGlYBNAAAJ">Bip54:
+				add sequence, timestamp (and version) to GBT</a> (February
+				2026)</li>
+				<li><a
 				href="https://groups.google.com/g/bitcoindev/c/6TTlDwP2OQg">Addressing
 				remaining points on BIP 54</a> (January 2026)</li>
+				<li><a
+				href="https://groups.google.com/g/bitcoindev/c/L4Eu9bA5iBw/m/jo9RzS-HAQAJ">Does
+				GCC preclude a soft fork to handle timestamp overflow?
+				</a> and <a
+				href="https://delvingbitcoin.org/t/modifying-bip54-to-support-future-ntime-soft-fork/2163">related
+				Delving Bitcoin forum post</a> (December 2025)</li>
+				<li><a
+				href="https://groups.google.com/g/bitcoinminingdev/c/jlqlNHHNSNk/m/RBT_LBWQAgAJ">Call
+				for mining pools to make their coinbase transactions compatible
+				with BIP 54</a> (November 2025)</li>
 				<li><a
 				href="https://groups.google.com/g/bitcoindev/c/rf3QOlzg230">Update
 				on the Great Consensus Cleanup Revival</a> (February 2025)</li>
@@ -631,7 +645,7 @@
 				2019)</li>
 			</ul>
 
-			<h3>Technical discussion</h3>
+			<h3><a href="#resources-discussion" id="resources-discussion">Technical discussion</a></h3>
 			<ul>
 				<li><a
 				href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710">Great
@@ -641,14 +655,14 @@
 				Cleanup Soft Fork</a> — Bitcoin Optech topic page</li>
 			</ul>
 
-			<h3>Implementation</h3>
+			<h3><a href="#resources-implementation" id="resources-implementation">Implementation</a></h3>
 			<ul>
 				<li><a
 				href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">Bitcoin
 				Inquisition PR #99</a> — BIP54 implementation on signet</li>
 			</ul>
 
-			<h3>Bitcoin Stack Exchange</h3>
+			<h3><a href="#resources-stackexchange" id="resources-stackexchange">Bitcoin Stack Exchange</a></h3>
 			<ul>
 				<li><a
 				href="https://bitcoin.stackexchange.com/questions/1511/gaming-the-off-by-one-bug-difficulty-re-target-based-on-2015-instead-of-2016">Gaming
@@ -678,7 +692,7 @@
 				is the witness commitment optional?</a></li>
 			</ul>
 
-			<h3>Podcasts & presentations</h3>
+			<h3><a href="#resources-podcasts" id="resources-podcasts">Podcasts & presentations</a></h3>
 			<ul>
 				<li><a
 				href="https://bitcoinops.org/en/podcast/2026/02/10/#addressing-remaining-points-on-bip54">Bitcoin
@@ -905,7 +919,7 @@
 			<h3><a href="#faq-activation" id="faq-activation">How would BIP54
 			activate?</a></h3>
 			<p>The activation mechanism for BIP54 has not yet been finalized.
-			Previous Bitcoin soft forks have used mechanisms like <a
+			<a href="https://bitcoinops.org/en/topics/soft-fork-activation/"></a>Previous Bitcoin soft forks</a> have used mechanisms like <a
 			href="https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki">BIP9</a>
 			(version bits with miner signaling), <a
 			href="https://github.com/bitcoin/bips/blob/master/bip-0008.mediawiki">BIP8</a>
@@ -935,7 +949,7 @@
 				<li><strong>Miner outreach:</strong> If you operate mining
 				infrastructure or know people who do, ensure they understand the
 				forward-compatibility requirements (especially the sigops and <a
-				href="https://mainnet.observer/charts/mining-pools-mining-bip54-coinbase/">coinbase
+				href="https://bnoc.xyz/t/forward-compatible-coinbase-locktimes-for-bip-54/75">coinbase
 				locktime changes</a>).</li>
 				<li><strong>Improve this website:</strong> If you have a
 				suggestion or improvement, see this website's repository on <a
