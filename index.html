@@ -267,15 +267,15 @@
 							href="https://bitcoinops.org/en/newsletters/2025/05/16/#bitcoin-core-32155">internal
 							miner</a> has been updated to comply.</p>
 							<p>SegWit transactions, which represent
-							approximately 90% of Bitcoin traffic, are not
-							affected by this issue because they already have
-							separate, stricter sigops accounting rules and don’t
-							suffer from the quadratic hashing issue. Their
-							standardized scriptPubKey formats are all quite few
-							bytes (P2WPKH, P2WSH, P2TR, P2A) and relegate any
-							actual sigops to the witness data of the currently
-							processed block, meaning they already counted toward
-							the block-level 80,000 limit.</p>
+							approximately 90% of Bitcoin traffic, are by their
+							definition not affected by this issue. The fact that
+							the witness/signature data is segregated from the
+							other transaction data being signed circumvents the
+							quadratic hashing problem. All sigops being
+							relegated to the witness data of the spending
+							transaction instead of the scriptPubKey of the spent
+							transaction means they are already covered by the
+							80,000 limit for the currently processed block.</p>
 							<p>Read more: <a href="https://www.bitmex.com/blog/attack-blocks">"Attack Blocks"</a> from BitMEX Research</p>
 						</div>
 					</details>
