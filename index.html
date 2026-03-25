@@ -37,9 +37,9 @@
 		<nav>
 			<ul>
 				<li><a href="#vulnerabilities">Vulnerabilities</a></li>
+				<li><a href="#faq">FAQ</a></li>
 				<li><a href="#timeline">Timeline</a></li>
 				<li><a href="#resources">Resources</a></li>
-				<li><a href="#faq">FAQ</a></li>
 			</ul>
 		</nav>
 		<h1>BIP54.org</h1>
@@ -52,6 +52,7 @@
 		</p>
 	</header>
 	<main>
+		<p class="notice"></p>
 		<section>
 			<header>
 				<h2><a href="#vulnerabilities" id="vulnerabilities">The four
@@ -473,6 +474,232 @@
 			</article>
 		</section>
 		<section>
+			<h2><a href="#faq" id="faq">FAQ</a></h2>
+
+			<h3><a href="#faq-whynow" id="faq-whynow">Why do BIP54 now?</a></h3>
+			<p>These vulnerabilities have existed since Bitcoin's launch in
+			2009. While none are known to have been exploited on mainnet yet,
+			they represent systemic risks to Bitcoin's security and
+			decentralization. The <a href="#timewarp">timewarp attack</a> could
+			allow a majority of hashrate to mine all remaining block subsidy in
+			just 40 days. <a href="#block-validation">Slow-to-validate
+			blocks</a> create denial-of-service attack vectors and
+			centralization pressure. The <a href="#merkle-vulnerability">merkle
+			tree vulnerability</a> enables attacks on SPV verifiers, and <a
+			href="#duplicate-transactions">duplicate transactions</a> risk is
+			mitigated by BIP30 but BIP54 significantly improves that fix.</p>
+			<p>These issues have been discussed for 7 years and BIP54 has been
+			refined over two years of research and community discussion since <a
+			href="https://groups.google.com/g/bitcoindev/c/CAfm7D5ppjo">Antoine
+			Poinsot revived</a> <a
+			href="https://gnusha.org/pi/bitcoindev/bf96c2fb-2e2e-a47f-e59f-87e56d83eca3@mattcorallo.com/">Matt
+			Corallo's 2019 proposal</a>. The fixes are now well-understood,
+			narrowly scoped, and have <a
+			href="https://bitcoinops.org/en/newsletters/2025/11/07/#bip54-implementation-and-test-vectors">test
+			vectors and implementation code</a> ready. Waiting longer only
+			increases the window during which these vulnerabilities could be
+			exploited.</p>
+
+			<h3><a href="#faq-safe" id="faq-safe">Is BIP54 safe? Could it break
+			existing uses of Bitcoin?</a></h3>
+			<p>BIP54 is designed to be a safe <a href="#faq-hardfork">soft
+			fork</a> that minimizes disruption to existing Bitcoin usage. The
+			proposal has been carefully refined to avoid confiscating coins or
+			breaking legitimate use cases:</p>
+			<ul>
+				<li><strong>64-byte transaction ban:</strong> Only affects a
+				very specific edge case. Any 64-byte transaction is necessarily
+				insecure as it must contain at most one output that either burns
+				coins or is spendable by anyone.</li>
+				<li><strong>Legacy sigops limit:</strong> The 2,500 sigops per
+				transaction limit is set conservatively high. Normal
+				transactions use far fewer sigops, and Bitcoin Core has already
+				made transactions exceeding this limit <a
+				href="https://bitcoinops.org/en/newsletters/2025/07/25/#bitcoin-core-32521">non-standard</a>
+				as a forward-compatibility measure.</li>
+				<li><strong>Timewarp fix:</strong> Only constrains timestamps at
+				difficulty period boundaries. Normal mining operations are
+				unaffected, and the fix includes a grace period as a
+				belt-and-suspenders safety measure.</li>
+				<li><strong>Coinbase locktime requirement:</strong> Miners
+				simply set the coinbase locktime field, whose usage is currently
+				unspecified. This change is already implemented in <a
+				href="https://bitcoinops.org/en/newsletters/2025/05/16/#bitcoin-core-32155">Bitcoin
+				Core's internal miner</a>.</li>
+			</ul>
+
+			<h3><a href="#faq-objections" id="faq-objections">What objections to
+			BIP54 remain?</a></h3>
+			<p>The main remaining objections center on the coinbase locktime
+			requirement and the 64-byte transaction ban:</p>
+			<ul>
+				<li><strong>Coinbase locktime:</strong> Some argue that
+				requiring coinbase transactions to set nLockTime to the block
+				height reduces miner flexibility, as this field could otherwise
+				be used as extra nonce space. <a
+				href="https://gnusha.org/pi/bitcoindev/UsKuvCXXhSAnNVx5a0K2UfP3srAr3slW9mcOjtYk9LnolaOXfWrW9jpqbxsQQPkyQuZogkhz2Hbfwii2VsTm79vRDpgKduxk35hpBu_t7Do=@protonmail.com/">Proponents
+				counter</a> that miners have other nonce sources available and
+				that improving the existing fix against <a
+				href="#duplicate-transactions">duplicate coinbase
+				transactions</a> is more important.</li>
+				<li><strong>64-byte transaction invalidation:</strong> Some
+				suggest alternative approaches like introducing a whole new
+				merkle tree that would allow 64-byte transactions. However,
+				these alternatives would require more invasive consensus
+				changes, while the simple ban affects virtually no real-world
+				usage.</li>
+			</ul>
+			<p>Overall, BIP54 is considered relatively uncontroversial compared
+			to other soft fork proposals, as it addresses clear vulnerabilities
+			without enabling new functionality that might have uncertain
+			implications. Discussion continues on <a
+			href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710">Delving
+			Bitcoin</a>.</p>
+
+			<h3><a href="#faq-whatif" id="faq-whatif">What will happen to
+			Bitcoin if we don't do BIP54?</a></h3>
+			<p>Bitcoin would continue to carry known vulnerabilities that could
+			be exploited:</p>
+			<ul>
+				<li><strong>Timewarp attack risk:</strong> A mining majority (or
+				even a minority exploiting the Murch-Zawy variant) could
+				manipulate block timestamps to reduce difficulty and mine blocks
+				far faster than intended, potentially exhausting the block
+				subsidy and destabilizing Bitcoin's monetary policy.</li>
+				<li><strong>Denial-of-service exposure:</strong> Attackers could
+				create blocks that take over an hour to validate on some
+				hardware, causing nodes to fall behind and potentially enabling
+				network splits or eclipse attacks.</li>
+				<li><strong>SPV wallet vulnerability:</strong> The 64-byte
+				transaction issue allows attackers to forge merkle proofs,
+				tricking SPV wallets into accepting transactions that don't
+				exist on the main chain.</li>
+				<li><strong>Duplicate transaction hazard:</strong> Around block
+				2 million, the risk of duplicate coinbase transactions creating
+				chain confusion becomes real without additional safeguards.</li>
+			</ul>
+			<p>These represent exploitable attack vectors that become more
+			dangerous as Bitcoin's value and adoption grow.</p>
+
+			<h3><a href="#faq-covenants" id="faq-covenants">Why not covenants
+			first?</a></h3>
+			<p>BIP54 and covenant proposals (like OP_CTV, OP_CAT, or other
+			script upgrades) serve completely different purposes and are not
+			mutually exclusive:</p>
+			<ul>
+				<li><strong>BIP54 fixes vulnerabilities</strong> that already
+				exist in Bitcoin. These are security issues that need to be
+				addressed regardless of what new features are added.</li>
+				<li><strong>Covenants add new functionality</strong> to enable
+				advanced smart contracts, vaults, payment pools, and other
+				features that don't currently exist in Bitcoin.</li>
+			</ul>
+			<p>The "covenants first" argument essentially suggests leaving known
+			security holes open while debating the design space for new
+			features. It is up to the community to determine if security fixes
+			should be prioritized independently of feature additions.
+			Additionally, BIP54 is much less controversial than covenant
+			designs, making it a more straightforward path to consensus.</p>
+			<p>There's no technical reason these can't proceed in parallel or in
+			either order. The Bitcoin community can work on both.</p>
+
+			<h3><a href="#faq-testnet4" id="faq-testnet4">Testnet4 has these
+			consensus cleanup fixes and keeps breaking — doesn't that mean BIP54
+			is broken?</a></h3>
+			<p>No. The <a
+			href="https://github.com/bitcoin/bips/blob/master/bip-0094.mediawiki">testnet4</a>
+			test network includes <em>some</em> consensus cleanup rules
+			(portions of the timewarp fix, but not the fix against the
+			Murch-Zawy attack), but testnet breakage is unrelated to those
+			rules. Test networks are meant to be disposable environments where
+			developers can experiment without the constraints of mainnet.</p>
+			<p>Importantly, testnet4 has special difficulty adjustment rules
+			that don't exist on mainnet: if no block is found for 20 minutes,
+			difficulty resets to minimum. This testnet-specific rule creates
+			instability and disruption that wouldn't occur on Bitcoin mainnet,
+			where difficulty adjustments follow strict 2,016-block periods.</p>
+			<p>The timewarp fix on testnet4 has worked as intended. When
+			testnet4 has reset or experienced issues, these have been due to
+			other factors like the 20-minute difficulty reset rule, low
+			hashrate, difficulty gaming, or intentional stress testing, not
+			failures of the consensus cleanup rules themselves.</p>
+			<p>BIP54's <a
+			href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">implementation
+			on Bitcoin Inquisition</a> (on the signet test network) provides a
+			more controlled testing environment with <a
+			href="https://bitcoinops.org/en/newsletters/2025/11/07/#bip54-implementation-and-test-vectors">comprehensive
+			test vectors</a> covering all the edge cases.</p>
+
+			<h3><a href="#faq-quantum" id="faq-quantum">What about
+			quantum?</a></h3>
+			<p>Quantum computing resistance is a separate concern from the
+			vulnerabilities BIP54 addresses. BIP54 is about fixing specific bugs
+			and attack vectors in Bitcoin's existing consensus rules: timewarp,
+			slow validation, merkle tree exploits, and duplicate
+			transactions.</p>
+			<p>Quantum-resistant cryptography would require a different set of
+			changes (possibly a new address format and signature algorithm) and
+			is still an area of active research. The timeline for quantum
+			computers threatening Bitcoin's elliptic curve cryptography is
+			uncertain.</p>
+			<p>BIP54 should be evaluated on its own merits as a security
+			upgrade. It neither helps nor hinders future quantum resistance
+			efforts, and there's no reason to delay fixing known vulnerabilities
+			while waiting for quantum-resistant proposals to mature.</p>
+
+			<h3><a href="#faq-hardfork" id="faq-hardfork">Is BIP54 a hard fork
+			or a soft fork?</a></h3>
+			<p>BIP54 is a <strong>soft fork</strong> which is a
+			backwards-compatible Bitcoin consensus change. After activation,
+			nodes that haven't upgraded will still follow the chain and
+			recognize blocks as valid, though they won't enforce the new rules
+			themselves. Soft forks only tighten the consensus rules; they don't
+			expand what's considered valid.</p>
+			<p>All four BIP54 changes are implemented as soft forks by making
+			currently-valid behaviors invalid or by adding new restrictions that
+			don't affect existing valid transactions and blocks.</p>
+
+			<h3><a href="#faq-activation" id="faq-activation">How would BIP54
+			activate?</a></h3>
+			<p>The activation mechanism for BIP54 has not yet been finalized.
+			<a href="https://bitcoinops.org/en/topics/soft-fork-activation/"></a>Previous Bitcoin soft forks</a> have used mechanisms like <a
+			href="https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki">BIP9</a>
+			(version bits with miner signaling), <a
+			href="https://github.com/bitcoin/bips/blob/master/bip-0008.mediawiki">BIP8</a>
+			(user-activated soft fork with optional miner signaling), or
+			combinations thereof.</p>
+			<p>The activation debate is separate from the technical merits of
+			the proposal itself. Once there is rough consensus on the changes
+			BIP54 proposes, the community will need to agree on an activation
+			method that balances user activation, miner coordination, and
+			network safety.</p>
+
+			<h3><a href="#faq-contribute" id="faq-contribute">How can I help
+			with BIP54?</a></h3>
+			<p>There are several ways to contribute:</p>
+			<ul>
+				<li><strong>Review the proposal:</strong> Read <a
+				href="https://github.com/bitcoin/bips/blob/master/bip-0054.md">BIP54</a>
+				and provide technical feedback on the <a
+				href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710">Delving
+				Bitcoin thread</a>.</li>
+				<li><strong>Test the implementation:</strong> Run <a
+				href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">Bitcoin
+				Inquisition</a> on signet and test BIP54's behavior with the
+				provided test vectors.</li>
+				<li><strong>Educate others:</strong> Share information about
+				BIP54's goals and benefits.</li>
+				<li><strong>Miner outreach:</strong> If you operate mining
+				infrastructure or know people who do, ensure they understand the
+				forward-compatibility requirements (especially the sigops and <a
+				href="https://bnoc.xyz/t/forward-compatible-coinbase-locktimes-for-bip-54/75">coinbase
+				locktime changes</a>).</li>
+				<li><strong>Improve this website:</strong> If you have a
+				suggestion or improvement, see this website's repository on <a
+				href="https://github.com/bitschmidty/bip54">GitHub</a>.</li>
+			</ul>
+		</section>
+		<section>
 			<h2><a href="#timeline" id="timeline">Timeline</a></h2>
 			<h3><a href="#progress" id="progress">In progress</a></h3>
 			<ul>
@@ -728,232 +955,6 @@
 				href="https://bitcoinops.org/en/podcast/2024/04/04/#revisiting-consensus-cleanup">Bitcoin
 				Optech Newsletter #296 Recap</a> — revisiting the Great
 				Consensus Cleanup proposal (April 2024)</li>
-			</ul>
-		</section>
-		<section>
-			<h2><a href="#faq" id="faq">FAQ</a></h2>
-
-			<h3><a href="#faq-whynow" id="faq-whynow">Why do BIP54 now?</a></h3>
-			<p>These vulnerabilities have existed since Bitcoin's launch in
-			2009. While none are known to have been exploited on mainnet yet,
-			they represent systemic risks to Bitcoin's security and
-			decentralization. The <a href="#timewarp">timewarp attack</a> could
-			allow a majority of hashrate to mine all remaining block subsidy in
-			just 40 days. <a href="#block-validation">Slow-to-validate
-			blocks</a> create denial-of-service attack vectors and
-			centralization pressure. The <a href="#merkle-vulnerability">merkle
-			tree vulnerability</a> enables attacks on SPV verifiers, and <a
-			href="#duplicate-transactions">duplicate transactions</a> risk is
-			mitigated by BIP30 but BIP54 significantly improves that fix.</p>
-			<p>These issues have been discussed for 7 years and BIP54 has been
-			refined over two years of research and community discussion since <a
-			href="https://groups.google.com/g/bitcoindev/c/CAfm7D5ppjo">Antoine
-			Poinsot revived</a> <a
-			href="https://gnusha.org/pi/bitcoindev/bf96c2fb-2e2e-a47f-e59f-87e56d83eca3@mattcorallo.com/">Matt
-			Corallo's 2019 proposal</a>. The fixes are now well-understood,
-			narrowly scoped, and have <a
-			href="https://bitcoinops.org/en/newsletters/2025/11/07/#bip54-implementation-and-test-vectors">test
-			vectors and implementation code</a> ready. Waiting longer only
-			increases the window during which these vulnerabilities could be
-			exploited.</p>
-
-			<h3><a href="#faq-safe" id="faq-safe">Is BIP54 safe? Could it break
-			existing uses of Bitcoin?</a></h3>
-			<p>BIP54 is designed to be a safe <a href="#faq-hardfork">soft
-			fork</a> that minimizes disruption to existing Bitcoin usage. The
-			proposal has been carefully refined to avoid confiscating coins or
-			breaking legitimate use cases:</p>
-			<ul>
-				<li><strong>64-byte transaction ban:</strong> Only affects a
-				very specific edge case. Any 64-byte transaction is necessarily
-				insecure as it must contain at most one output that either burns
-				coins or is spendable by anyone.</li>
-				<li><strong>Legacy sigops limit:</strong> The 2,500 sigops per
-				transaction limit is set conservatively high. Normal
-				transactions use far fewer sigops, and Bitcoin Core has already
-				made transactions exceeding this limit <a
-				href="https://bitcoinops.org/en/newsletters/2025/07/25/#bitcoin-core-32521">non-standard</a>
-				as a forward-compatibility measure.</li>
-				<li><strong>Timewarp fix:</strong> Only constrains timestamps at
-				difficulty period boundaries. Normal mining operations are
-				unaffected, and the fix includes a grace period as a
-				belt-and-suspenders safety measure.</li>
-				<li><strong>Coinbase locktime requirement:</strong> Miners
-				simply set the coinbase locktime field, whose usage is currently
-				unspecified. This change is already implemented in <a
-				href="https://bitcoinops.org/en/newsletters/2025/05/16/#bitcoin-core-32155">Bitcoin
-				Core's internal miner</a>.</li>
-			</ul>
-
-			<h3><a href="#faq-objections" id="faq-objections">What objections to
-			BIP54 remain?</a></h3>
-			<p>The main remaining objections center on the coinbase locktime
-			requirement and the 64-byte transaction ban:</p>
-			<ul>
-				<li><strong>Coinbase locktime:</strong> Some argue that
-				requiring coinbase transactions to set nLockTime to the block
-				height reduces miner flexibility, as this field could otherwise
-				be used as extra nonce space. <a
-				href="https://gnusha.org/pi/bitcoindev/UsKuvCXXhSAnNVx5a0K2UfP3srAr3slW9mcOjtYk9LnolaOXfWrW9jpqbxsQQPkyQuZogkhz2Hbfwii2VsTm79vRDpgKduxk35hpBu_t7Do=@protonmail.com/">Proponents
-				counter</a> that miners have other nonce sources available and
-				that improving the existing fix against <a
-				href="#duplicate-transactions">duplicate coinbase
-				transactions</a> is more important.</li>
-				<li><strong>64-byte transaction invalidation:</strong> Some
-				suggest alternative approaches like introducing a whole new
-				merkle tree that would allow 64-byte transactions. However,
-				these alternatives would require more invasive consensus
-				changes, while the simple ban affects virtually no real-world
-				usage.</li>
-			</ul>
-			<p>Overall, BIP54 is considered relatively uncontroversial compared
-			to other soft fork proposals, as it addresses clear vulnerabilities
-			without enabling new functionality that might have uncertain
-			implications. Discussion continues on <a
-			href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710">Delving
-			Bitcoin</a>.</p>
-
-			<h3><a href="#faq-whatif" id="faq-whatif">What will happen to
-			Bitcoin if we don't do BIP54?</a></h3>
-			<p>Bitcoin would continue to carry known vulnerabilities that could
-			be exploited:</p>
-			<ul>
-				<li><strong>Timewarp attack risk:</strong> A mining majority (or
-				even a minority exploiting the Murch-Zawy variant) could
-				manipulate block timestamps to reduce difficulty and mine blocks
-				far faster than intended, potentially exhausting the block
-				subsidy and destabilizing Bitcoin's monetary policy.</li>
-				<li><strong>Denial-of-service exposure:</strong> Attackers could
-				create blocks that take over an hour to validate on some
-				hardware, causing nodes to fall behind and potentially enabling
-				network splits or eclipse attacks.</li>
-				<li><strong>SPV wallet vulnerability:</strong> The 64-byte
-				transaction issue allows attackers to forge merkle proofs,
-				tricking SPV wallets into accepting transactions that don't
-				exist on the main chain.</li>
-				<li><strong>Duplicate transaction hazard:</strong> Around block
-				2 million, the risk of duplicate coinbase transactions creating
-				chain confusion becomes real without additional safeguards.</li>
-			</ul>
-			<p>These represent exploitable attack vectors that become more
-			dangerous as Bitcoin's value and adoption grow.</p>
-
-			<h3><a href="#faq-covenants" id="faq-covenants">Why not covenants
-			first?</a></h3>
-			<p>BIP54 and covenant proposals (like OP_CTV, OP_CAT, or other
-			script upgrades) serve completely different purposes and are not
-			mutually exclusive:</p>
-			<ul>
-				<li><strong>BIP54 fixes vulnerabilities</strong> that already
-				exist in Bitcoin. These are security issues that need to be
-				addressed regardless of what new features are added.</li>
-				<li><strong>Covenants add new functionality</strong> to enable
-				advanced smart contracts, vaults, payment pools, and other
-				features that don't currently exist in Bitcoin.</li>
-			</ul>
-			<p>The "covenants first" argument essentially suggests leaving known
-			security holes open while debating the design space for new
-			features. It is up to the community to determine if security fixes
-			should be prioritized independently of feature additions.
-			Additionally, BIP54 is much less controversial than covenant
-			designs, making it a more straightforward path to consensus.</p>
-			<p>There's no technical reason these can't proceed in parallel or in
-			either order. The Bitcoin community can work on both.</p>
-
-			<h3><a href="#faq-testnet4" id="faq-testnet4">Testnet4 has these
-			consensus cleanup fixes and keeps breaking — doesn't that mean BIP54
-			is broken?</a></h3>
-			<p>No. The <a
-			href="https://github.com/bitcoin/bips/blob/master/bip-0094.mediawiki">testnet4</a>
-			test network includes <em>some</em> consensus cleanup rules
-			(portions of the timewarp fix, but not the fix against the
-			Murch-Zawy attack), but testnet breakage is unrelated to those
-			rules. Test networks are meant to be disposable environments where
-			developers can experiment without the constraints of mainnet.</p>
-			<p>Importantly, testnet4 has special difficulty adjustment rules
-			that don't exist on mainnet: if no block is found for 20 minutes,
-			difficulty resets to minimum. This testnet-specific rule creates
-			instability and disruption that wouldn't occur on Bitcoin mainnet,
-			where difficulty adjustments follow strict 2,016-block periods.</p>
-			<p>The timewarp fix on testnet4 has worked as intended. When
-			testnet4 has reset or experienced issues, these have been due to
-			other factors like the 20-minute difficulty reset rule, low
-			hashrate, difficulty gaming, or intentional stress testing, not
-			failures of the consensus cleanup rules themselves.</p>
-			<p>BIP54's <a
-			href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">implementation
-			on Bitcoin Inquisition</a> (on the signet test network) provides a
-			more controlled testing environment with <a
-			href="https://bitcoinops.org/en/newsletters/2025/11/07/#bip54-implementation-and-test-vectors">comprehensive
-			test vectors</a> covering all the edge cases.</p>
-
-			<h3><a href="#faq-quantum" id="faq-quantum">What about
-			quantum?</a></h3>
-			<p>Quantum computing resistance is a separate concern from the
-			vulnerabilities BIP54 addresses. BIP54 is about fixing specific bugs
-			and attack vectors in Bitcoin's existing consensus rules: timewarp,
-			slow validation, merkle tree exploits, and duplicate
-			transactions.</p>
-			<p>Quantum-resistant cryptography would require a different set of
-			changes (possibly a new address format and signature algorithm) and
-			is still an area of active research. The timeline for quantum
-			computers threatening Bitcoin's elliptic curve cryptography is
-			uncertain.</p>
-			<p>BIP54 should be evaluated on its own merits as a security
-			upgrade. It neither helps nor hinders future quantum resistance
-			efforts, and there's no reason to delay fixing known vulnerabilities
-			while waiting for quantum-resistant proposals to mature.</p>
-
-			<h3><a href="#faq-hardfork" id="faq-hardfork">Is BIP54 a hard fork
-			or a soft fork?</a></h3>
-			<p>BIP54 is a <strong>soft fork</strong> which is a
-			backwards-compatible Bitcoin consensus change. After activation,
-			nodes that haven't upgraded will still follow the chain and
-			recognize blocks as valid, though they won't enforce the new rules
-			themselves. Soft forks only tighten the consensus rules; they don't
-			expand what's considered valid.</p>
-			<p>All four BIP54 changes are implemented as soft forks by making
-			currently-valid behaviors invalid or by adding new restrictions that
-			don't affect existing valid transactions and blocks.</p>
-
-			<h3><a href="#faq-activation" id="faq-activation">How would BIP54
-			activate?</a></h3>
-			<p>The activation mechanism for BIP54 has not yet been finalized.
-			<a href="https://bitcoinops.org/en/topics/soft-fork-activation/"></a>Previous Bitcoin soft forks</a> have used mechanisms like <a
-			href="https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki">BIP9</a>
-			(version bits with miner signaling), <a
-			href="https://github.com/bitcoin/bips/blob/master/bip-0008.mediawiki">BIP8</a>
-			(user-activated soft fork with optional miner signaling), or
-			combinations thereof.</p>
-			<p>The activation debate is separate from the technical merits of
-			the proposal itself. Once there is rough consensus on the changes
-			BIP54 proposes, the community will need to agree on an activation
-			method that balances user activation, miner coordination, and
-			network safety.</p>
-
-			<h3><a href="#faq-contribute" id="faq-contribute">How can I help
-			with BIP54?</a></h3>
-			<p>There are several ways to contribute:</p>
-			<ul>
-				<li><strong>Review the proposal:</strong> Read <a
-				href="https://github.com/bitcoin/bips/blob/master/bip-0054.md">BIP54</a>
-				and provide technical feedback on the <a
-				href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710">Delving
-				Bitcoin thread</a>.</li>
-				<li><strong>Test the implementation:</strong> Run <a
-				href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">Bitcoin
-				Inquisition</a> on signet and test BIP54's behavior with the
-				provided test vectors.</li>
-				<li><strong>Educate others:</strong> Share information about
-				BIP54's goals and benefits.</li>
-				<li><strong>Miner outreach:</strong> If you operate mining
-				infrastructure or know people who do, ensure they understand the
-				forward-compatibility requirements (especially the sigops and <a
-				href="https://bnoc.xyz/t/forward-compatible-coinbase-locktimes-for-bip-54/75">coinbase
-				locktime changes</a>).</li>
-				<li><strong>Improve this website:</strong> If you have a
-				suggestion or improvement, see this website's repository on <a
-				href="https://github.com/bitschmidty/bip54">GitHub</a>.</li>
 			</ul>
 		</section>
 	</main>
