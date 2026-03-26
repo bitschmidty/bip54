@@ -671,6 +671,15 @@
 			currently-valid behaviors invalid or by adding new restrictions that
 			don't affect existing valid transactions and blocks.</p>
 
+			<h3 id="faq-taproot_ptsd">Could this facilitate spam, like taproot did?</h3>
+			<p>Taproot did not enforce the 10,000-byte script limit enforced on
+			segwitv0 witness scripts. That increased the contiguous space
+			allowed by consensus (for standardized transaction types) from ~1MB
+			OP_RETURNs to ~4MB discounted witness data. The soft fork proposed
+			in BIP54 strictly serves to narrow the scope of what is allowed, and
+			does not touch limits on transaction sizes beyond banning 64-byte
+			ones.</p>
+
 			<h3><a href="#faq-activation" id="faq-activation">How would BIP54
 			activate?</a></h3>
 			<p>The activation mechanism for BIP54 has not yet been finalized.
