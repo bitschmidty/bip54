@@ -698,6 +698,21 @@
 				</div>
 			</details>
 
+			<details id="faq-abuse">
+				<summary>Could this soft fork facilitate non-monetary use of Bitcoin?</summary>
+				<div>
+					<p>Segwit expanded what could be done by adding on a separate
+					storage area for witness data. On the contrary, the BIP54 soft fork
+					only strictly narrows the scope of what is allowed.
+					It limits pre-segwit transaction outputs, block header timestamps,
+					coinbase transaction locktimes & sequence, and bans transaction
+					sizes of 64 bytes.
+					It is orthogonal to the concerns related to the usage of Bitcoin
+					transactions to store arbitrary data and does not relax relay
+					policy.</p>
+				</div>
+			</details>
+
 			<details id="faq-activation">
 				<summary>How would BIP54 activate?</summary>
 				<div>
