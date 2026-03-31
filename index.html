@@ -90,16 +90,14 @@
 							<p>Bitcoin adjusts mining difficulty every 2,016
 							blocks to maintain an average 10-minute block time.
 							However, the current difficulty adjustment compares
-							the timestamp of the last block in the current
-							period with the timestamp of the first block in the
-							previous period, a span that covers only 2,015
-							blocks.</p>
+							the timestamps of the first and last block of a period,
+							a span that covers only 2,015 block intervals.</p>
 							<p>This creates an <a
 							href="https://bitcoin.stackexchange.com/questions/1511/gaming-the-off-by-one-bug-difficulty-re-target-based-on-2015-instead-of-2016">"off-by-one"
-							bug</a>: the first block of each difficulty period
-							is not included in the calculation for the next
-							adjustment. Miners exploiting the timewarp attack
-							manipulate this gap by:</p>
+							bug</a>: the first block of a difficulty adjustment
+							period is different from the last block of the previous
+							period. Miners exploiting the timewarp attack manipulate
+							this gap by:</p>
 							<ol>
 								<li>Setting the timestamp of the <strong>last
 								block</strong> in each difficulty period to the
@@ -161,17 +159,16 @@
 							the timewarp attack.</p>
 							<p>The fix also includes a two-hour grace period
 							after each difficulty adjustment to accommodate
-							natural timestamp variation and prevent accidental
-							chain splits.</p>
+							natural timestamp variation.</p>
 
 							<h4>Variants</h4>
 							<p>The <a
-							href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710/27"><strong>Murch-Zawy
+							href="https://delvingbitcoin.org/t/zawy-s-alternating-timestamp-attack/1062#variant-on-zawys-attack-2"><strong>Murch-Zawy
 							timewarp variant</strong></a> circumvents the above
 							rule by setting the end timestamps of 2 difficulty
 							periods several weeks into the future to achieve a
 							greater decrease in difficulty by the time the chain
-							is accepted. To unsure the chain is eventually
+							is accepted. To ensure the chain is eventually
 							accepted by the wider network and doesn't always
 							have timestamps too far in the future, this attack
 							has to alternate with 1 difficulty period which is
@@ -214,28 +211,24 @@
 						<summary>Technical details and fix</summary>
 						<div id="block-validation-details">
 							<h4>The problem</h4>
-							<p>Legacy Bitcoin transactions (pre-segwit) can
-							contain an extremely high number of <a
-							href="https://bitcoin.stackexchange.com/questions/67760/how-are-sigops-calculated">signature
-							operations (sigops)</a>. While Bitcoin has a
-							block-level limit of 80,000 sigops, it lacks a
-							<em>per-transaction</em> limit for legacy script
-							evaluation.</p>
-							<p>An attacker can exploit this by filling a block
-							with transactions that each contain thousands of
-							sigops but remain under the block-wide limit.
-							Validating these signature operations is
-							computationally expensive and a carefully crafted
-							block can take <strong>over 90 minutes to
-							validate</strong> on lower-end hardware, even though
-							it is valid according to current consensus
-							rules.</p>
-							<p>This vulnerability combines with the <a
-							href="https://bitcoin.stackexchange.com/questions/63625/what-causes-quadratic-hash-problem">quadratic
-							hashing problem</a> in legacy transactions, where
-							validation time grows quadratically with transaction
-							size.</p>
-
+							<p>Legacy Bitcoin transactions (pre-segwit) can be
+							specially crafted to artificially increase their
+							validation times. Various techniques may be used to
+							exploit improper resource usage limits and quadratic
+							behaviour in validation of pre-segwit Bitcoin Script.</p>
+							<p>An attacker can exploit this to create blocks that
+							can take <strong>several hours to validate</strong> on
+							lower-end hardware, even though it is valid according
+							to current consensus rules. A variation of this attack
+							is for a miner to delay its competition with blocks that
+							take under a minute to validate but are significantly
+							cheaper to create, to systematically delay its competition.</p>
+							<p>While most experts would be able to figure out how
+							to create hard to validate blocks, details have been
+							discussed in a private Delving Bitcoin thread out of
+							an abundance of caution. A <a href="https://groups.google.com/g/bitcoindev/c/wOVjJoLDWfA/m/xV0afQDRAAAJ">
+							demo was performed on the Signet test network</a> in
+							March 2026.</p>
 							<h4>Attack scenarios</h4>
 							<ul>
 								<li>Denial of service due to nodes spending
@@ -243,25 +236,17 @@
 								behind the chain tip, making them vulnerable to
 								eclipse attacks or causing them to be
 								partitioned from the network</li>
-								<li>Mining centralization since only miners with
-								high-end validation infrastructure can keep up,
-								pushing smaller miners and node operators
-								out</li>
-								<li>Skewed miner incentives as miners may prefer
-								to skip validation of expensive blocks and risk
-								mining on top of invalid chains</li>
-								<li>Chain split risk as nodes with different
-								hardware capabilities might have different views
-								of which chain has the most work if validation
-								times exceed block arrival times</li>
+								<li>Longer block validation and propagation times
+								increase stale rate, disproportionately advantaging
+								larger miners at the expense of smaller ones</li>
+								<li>Prohibitive block validation times may:
+								<ul>
+									<li>incentivize miners to skip it in favour of non-technical enforcement
+									mechanisms (typically, through legal contracts)</li>
+									<li>Push out node operators using less performant hardware</li>
+								</ul>
 							</ul>
-							<p>An example of enforcement of the block-level
-							limit occurred in 2023 when F2Pool accidentally
-							mined <a
-							href="https://bitcoin.stackexchange.com/questions/117837/how-many-sigops-are-in-the-invalid-block-783426">block
-							783426</a>, which Bitcoin Core rejected for
-							exceeding the sigops limit.</p>
-							
+
 							<h4>BIP54's fix</h4>
 							<p>BIP54 introduces a <strong>per-transaction limit
 							of 2,500 legacy sigops</strong>. This is a
@@ -269,26 +254,18 @@
 							fewer sigops. Even then, reaching this limit
 							requires a transaction that deliberately inflates
 							validation costs, which is the behavior this fix
-							aims to prevent.</p>
+							aims to prevent. The limit does not apply to Segwit
+							transactions, which represent 90% of today's traffic,
+							since they are by definition not affected by this issue.</p>
 							<p>The fix reduces worst-case block validation time
 							by approximately <strong>40x</strong> while
 							minimizing the risk of confiscating coins locked in
 							unusual legacy scripts. Bitcoin Core has already
 							made transactions exceeding this limit <a
 							href="https://bitcoinops.org/en/newsletters/2025/07/25/#bitcoin-core-32521">non-standard</a>
-							as a forward-compatibility measure, and the <a
-							href="https://bitcoinops.org/en/newsletters/2025/05/16/#bitcoin-core-32155">internal
-							miner</a> has been updated to comply.</p>
-							<p>SegWit transactions, which represent
-							approximately 90% of Bitcoin traffic, are by their
-							definition not affected by this issue. The fact that
-							the witness/signature data is segregated from the
-							other transaction data being signed circumvents the
-							quadratic hashing problem. All sigops being
-							relegated to the witness data of the spending
-							transaction instead of the scriptPubKey of the spent
-							transaction means they are already covered by the
-							80,000 limit for the currently processed block.</p>
+							as a forward-compatibility measure, meaning miners
+							running Bitcoin Core will not include these transactions
+							in their blocks by default.</p>
 							<p>Read more: <a href="https://www.bitmex.com/blog/attack-blocks">"Attack Blocks"</a> from BitMEX Research</p>
 						</div>
 					</details>
@@ -330,7 +307,7 @@
 							<p>By crafting a 64-byte transaction that matches an
 							internal merkle node hash, an attacker can:</p>
 							<ol>
-								<li>Create a fake transaction that appears to
+								<li>Create an arbitrarily-sized fake transaction that appears to
 								have valid proof-of-work behind it</li>
 								<li>Present a merkle proof to an SPV verifier
 								showing this "transaction" is confirmed</li>
@@ -339,7 +316,8 @@
 								full node</li>
 							</ol>
 							<p>The attacker doesn't need to mine blocks or
-							perform expensive proof-of-work. They simply
+							perform expensive proof-of-work. They do need
+							however to perform about 70 bits of work to
 							construct a malicious merkle tree structure and
 							present it to the victim's SPV wallet/verifier.</p>
 
@@ -388,7 +366,7 @@
 				</header>
 				<p>
 					Bitcoin's consensus rules use transaction IDs to uniquely
-					identify transactions, so duplicate transactions from miners
+					identify transactions, so duplicate transactions
 					can cause unwanted behavior including loss of funds and
 					other <mark>attack vectors</mark>.
 
@@ -528,7 +506,9 @@
 				transactions use far fewer sigops, and Bitcoin Core has already
 				made transactions exceeding this limit <a
 				href="https://bitcoinops.org/en/newsletters/2025/07/25/#bitcoin-core-32521">non-standard</a>
-				as a forward-compatibility measure.</li>
+				as a forward-compatibility measure. Any transaction that would
+				hit this limit may be split into multiple transactions that don't,
+				ensuring that no UTxO is directly made unspendable.</li>
 				<li><strong>Timewarp fix:</strong> Only constrains timestamps at
 				difficulty period boundaries. Normal mining operations are
 				unaffected, and the fix includes a grace period as a
@@ -537,7 +517,8 @@
 				simply set the coinbase locktime field, whose usage is currently
 				unspecified. This change is already implemented in <a
 				href="https://bitcoinops.org/en/newsletters/2025/05/16/#bitcoin-core-32155">Bitcoin
-				Core's internal miner</a>.</li>
+				Core's internal miner</a> and is in the process of being
+				adopted by mining pools.</li>
 			</ul>
 
 			<h3><a href="#faq-objections" id="faq-objections">What objections to
@@ -555,7 +536,8 @@
 				href="#duplicate-transactions">duplicate coinbase
 				transactions</a> is more important.</li>
 				<li><strong>64-byte transaction invalidation:</strong> Some
-				suggest alternative approaches like introducing a whole new
+				<a href="https://gnusha.org/pi/bitcoindev/UsKuvCXXhSAnNVx5a0K2UfP3srAr3slW9mcOjtYk9LnolaOXfWrW9jpqbxsQQPkyQuZogkhz2Hbfwii2VsTm79vRDpgKduxk35hpBu_t7Do=@protonmail.com/">suggest</a>
+				alternative approaches like introducing a whole new
 				merkle tree that would allow 64-byte transactions. However,
 				these alternatives would require more invasive consensus
 				changes, while the simple ban affects virtually no real-world
@@ -573,22 +555,21 @@
 			<p>Bitcoin would continue to carry known vulnerabilities that could
 			be exploited:</p>
 			<ul>
-				<li><strong>Timewarp attack risk:</strong> A mining majority (or
-				even a minority exploiting the Murch-Zawy variant) could
+				<li><strong>Timewarp attack risk:</strong> A mining majority could
 				manipulate block timestamps to reduce difficulty and mine blocks
-				far faster than intended, potentially exhausting the block
-				subsidy and destabilizing Bitcoin's monetary policy.</li>
+				far faster than intended, potentially destabilizing Bitcoin's monetary
+				policy and crippling the network in the process.</li>
 				<li><strong>Denial-of-service exposure:</strong> Attackers could
-				create blocks that take over an hour to validate on some
-				hardware, causing nodes to fall behind and potentially enabling
-				network splits or eclipse attacks.</li>
-				<li><strong>SPV wallet vulnerability:</strong> The 64-byte
+				create slow to validate blocks that would skew miner incentive
+				and raise the bar to join the network and perform full validation.</li>
+				<li><strong>SPV verifier vulnerability:</strong> The 64-byte
 				transaction issue allows attackers to forge merkle proofs,
-				tricking SPV wallets into accepting transactions that don't
-				exist on the main chain.</li>
-				<li><strong>Duplicate transaction hazard:</strong> Around block
-				2 million, the risk of duplicate coinbase transactions creating
-				chain confusion becomes real without additional safeguards.</li>
+				tricking SPV verifiers (wallets, side systems) into accepting
+				transactions that don't exist on the main chain.</li>
+				<li><strong>Duplicate transaction burden:</strong> Around block
+				2 million, preventing duplicate transaction imposes an additional
+				burden on block validation and precludes alternative full node
+				designs (like Utreexo).</li>
 			</ul>
 			<p>These represent exploitable attack vectors that become more
 			dangerous as Bitcoin's value and adoption grow.</p>
@@ -667,9 +648,6 @@
 			recognize blocks as valid, though they won't enforce the new rules
 			themselves. Soft forks only tighten the consensus rules; they don't
 			expand what's considered valid.</p>
-			<p>All four BIP54 changes are implemented as soft forks by making
-			currently-valid behaviors invalid or by adding new restrictions that
-			don't affect existing valid transactions and blocks.</p>
 
 			<h3><a href="#faq-activation" id="faq-activation">How would BIP54
 			activate?</a></h3>
@@ -703,7 +681,7 @@
 				BIP54's goals and benefits.</li>
 				<li><strong>Miner outreach:</strong> If you operate mining
 				infrastructure or know people who do, ensure they understand the
-				forward-compatibility requirements (especially the sigops and <a
+				forward-compatibility requirements (especially the <a
 				href="https://bnoc.xyz/t/forward-compatible-coinbase-locktimes-for-bip-54/75">coinbase
 				locktime changes</a>).</li>
 				<li><strong>Improve this website:</strong> If you have a
@@ -728,6 +706,7 @@
 			<h3><a href="#history" id="history">History</a></h3>
 			<h4>2026</h4>
 			<ul>
+			<li><a href="https://groups.google.com/g/bitcoindev/c/wOVjJoLDWfA/m/xV0afQDRAAAJ">Demo of hard to validate blocks on Signet test network</a></li>
 			<li><a
 			href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">Bitcoin
 			Inquisition #99 merges BIP54 implementation on signet</a></li>
