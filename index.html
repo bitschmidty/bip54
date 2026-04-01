@@ -224,7 +224,7 @@
 							take under a minute to validate but are significantly
 							cheaper to create, to systematically delay its competition.</p>
 							<p>While most experts would be able to figure out how
-							to create hard to validate blocks, details have been
+							to create hard-to-validate blocks, details have been
 							discussed in a private Delving Bitcoin thread out of
 							an abundance of caution. A <a href="https://groups.google.com/g/bitcoindev/c/wOVjJoLDWfA/m/xV0afQDRAAAJ">
 							demo was performed on the Signet test network</a> in
@@ -254,7 +254,7 @@
 							fewer sigops. Even then, reaching this limit
 							requires a transaction that deliberately inflates
 							validation costs, which is the behavior this fix
-							aims to prevent. The limit does not apply to Segwit
+							aims to prevent. The limit does not apply to segwit
 							transactions, which represent 90% of today's traffic,
 							since they are by definition not affected by this issue.</p>
 							<p>The fix reduces worst-case block validation time
@@ -508,7 +508,7 @@
 				href="https://bitcoinops.org/en/newsletters/2025/07/25/#bitcoin-core-32521">non-standard</a>
 				as a forward-compatibility measure. Any transaction that would
 				hit this limit may be split into multiple transactions that don't,
-				ensuring that no UTxO is directly made unspendable.</li>
+				ensuring that no UTXO is directly made unspendable.</li>
 				<li><strong>Timewarp fix:</strong> Only constrains timestamps at
 				difficulty period boundaries. Normal mining operations are
 				unaffected, and the fix includes a grace period as a
