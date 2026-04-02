@@ -54,16 +54,16 @@
 	<main>
 		<h2><a href="#summary" id="summary">Executive Summary</a></h2>
 		<p class="notice">
-			These four flaws could allow for <a href="#timewarp">draining of all
-			remaining block subsidy in 40 days</a>, blocks that take <a
-			href="#block-validation">over an hour to validate</a>, <a
+			These four flaws could allow for <a href="#timewarp">effectively
+			breaking the network with 6 blocks per second</a>, blocks that take
+			<a href="#block-validation">over an hour to validate</a>, <a
 			href="#merkle-vulnerability">forging transactions</a> for SPV
-			verifiers, and causing chain confusion through <a
+			verifiers, and require computationally expensive handling of <a
 			href="#duplicate-transactions">duplicate transactions</a>. These
 			issues have been discussed for 7 years and the fixes are now
 			well-understood and narrowly scoped. These represent systemic risks
 			to Bitcoin's security and decentralization that become more
-			dangerous as Bitcoin's value and adoption grow. 
+			dangerous as Bitcoin's value and adoption grow.
 		</p>
 		<section>
 			<header>
@@ -78,10 +78,10 @@
 				<p>
 					Timewarp is an exploit of Bitcoin's difficulty adjustment
 					algorithm that allows miners controlling a large amount of
-					hashrate to increase how fast blocks are mined, resulting in
-					the <mark>mining of all remaining block subsidy in just 40
-					days</mark>, <mark>full nodes losing control of their
-					resource usage</mark>, among other disruptions.
+					hashrate to increase how fast blocks are mined. <mark>The
+					attack could render the network non-viable with 6 blocks per
+					second</mark>, mine the remaining subsidy, and impact the
+					ability of users to run a full node.
 
 					<details>
 						<summary>Technical details and fix</summary>
@@ -113,8 +113,8 @@
 							<p>This timestamp manipulation makes each period
 							appear to have taken longer than it actually did,
 							causing difficulty to decrease. The attack can be
-							repeated indefinitely, progressively reducing
-							difficulty to its minimum value.</p>
+							repeated indefinitely with a compounding effect,
+							progressively reducing difficulty to its minimum value.</p>
 
 							<h4>Impact</h4>
 							<p>Once difficulty reaches the minimum, a majority
