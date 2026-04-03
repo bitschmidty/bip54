@@ -561,6 +561,30 @@
 				</div>
 			</details>
 
+			<details id="faq-user-action">
+				<summary>What would an average user have to do if BIP54 activates?</summary>
+				<div>
+					<p><strong>Nothing.</strong> BIP54 is a soft fork that activates
+					at the consensus layer and requires no action from average Bitcoin
+					users:</p>
+					<ul>
+						<li><strong>Wallet users:</strong> No action required. Your
+						wallet will continue to work normally. The changes don't affect
+						how you send, receive, or store bitcoin.</li>
+						<li><strong>Node operators:</strong> Upgrading to a version of
+						Bitcoin Core (or other node software) that includes BIP54 is
+						recommended but not required. Non-upgraded nodes will still
+						follow the chain and see all transactions, though they won't
+						enforce the new rules themselves.</li>
+						<li><strong>Transactions:</strong> You don't need to do anything
+						different. Normal transactions are completely unaffected by
+						BIP54's changes.</li>
+					</ul>
+					<p>The fixes happen in the background to make Bitcoin more
+					secure and robust.</p>
+				</div>
+			</details>
+
 			<details id="faq-whatif">
 				<summary>What will happen to Bitcoin if we don't do BIP54?</summary>
 				<div>
@@ -614,7 +638,7 @@
 			</details>
 
 			<details id="faq-testnet4">
-				<summary>Testnet4 has these consensus cleanup fixes and keeps breaking — doesn't that mean BIP54 is broken?</summary>
+				<summary>Testnet4 has these consensus cleanup fixes and keeps breaking. Does that mean BIP54 is broken?</summary>
 				<div>
 					<p>No. The <a
 					href="https://github.com/bitcoin/bips/blob/master/bip-0094.mediawiki">testnet4</a>
