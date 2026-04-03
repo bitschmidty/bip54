@@ -56,15 +56,15 @@
 		<h2><a href="#summary" id="summary">Executive Summary</a></h2>
 		<p class="notice">
 			These four flaws could allow for <a href="#timewarp">effectively
-			breaking the network with 6 blocks per second</a>, blocks that take
-			<a href="#block-validation">over an hour to validate</a>, <a
-			href="#merkle-vulnerability">forging transactions</a> for SPV
-			verifiers, and require computationally expensive handling of <a
-			href="#duplicate-transactions">duplicate transactions</a>. These
-			issues have been discussed for 7 years and the fixes are now
-			well-understood and narrowly scoped. These represent systemic risks
-			to Bitcoin's security and decentralization that become more
-			dangerous as Bitcoin's value and adoption grow.
+			breaking the network with 6 blocks per second</a>, <a
+			href="#block-validation">poison blocks that take over an hour to
+			validate</a>, <a href="#merkle-vulnerability">forging
+			transactions</a> for SPV verifiers, and require computationally
+			expensive handling of <a href="#duplicate-transactions">duplicate
+			transactions</a>. These issues have been discussed for 7 years and
+			the fixes are now well-understood and narrowly scoped. These
+			represent systemic risks to Bitcoin's security and decentralization
+			that become more dangerous as Bitcoin's value and adoption grow.
 		</p>
 		<section>
 			<header>
@@ -204,8 +204,8 @@
 				</header>
 				<p>
 					A well-prepared attacker can create <mark>specially-crafted
-					blocks that take more than an hour to verify</mark> on
-					certain computers allowing for various denial-of-service
+					"poison blocks" that take more than an hour to verify</mark>
+					on certain computers, allowing for various denial-of-service
 					attacks.
 
 					<details>
