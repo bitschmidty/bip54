@@ -585,6 +585,50 @@
 				</div>
 			</details>
 
+			<details id="faq-bundling">
+				<summary>Why bundle these four fixes together instead of doing four separate soft forks?</summary>
+				<div>
+					<p>Bundling these fixes together offers several advantages:</p>
+					<ul>
+						<li><strong>Reduced coordination burden:</strong> One soft fork
+						activation is significantly simpler than coordinating four
+						separate ones. The ecosystem goes through one upgrade cycle
+						instead of four, minimizing disruption and overhead for
+						developers, node operators, miners, and the broader Bitcoin
+						infrastructure.</li>
+						<li><strong>Categorically related:</strong> All four fixes address
+						long-standing consensus bugs and vulnerabilities rather than
+						adding new features. They naturally belong together as a
+						"consensus cleanup" package.</li>
+						<li><strong>Review complexity:</strong> Bundling
+						them doesn't significantly increase review complexity compared
+						to reviewing them separately.</li>
+					</ul>
+					<p>Potential downsides are:</p>
+					<ul>
+						<li><strong>All-or-nothing approach:</strong> If one fix becomes
+						controversial, it could delay the entire package.</li>
+						<li><strong>Precedent concerns:</strong> Some worry that bundling
+						could set a precedent for future soft forks to bundle unrelated
+						or controversial changes together, potentially forcing through
+						less desirable features by packaging them with necessary
+						fixes.</li>
+					</ul>
+					<p>Proponents argue these risks are mitigated in BIP54's case
+					because all four fixes are security improvements (not new features)
+					addressing existing vulnerabilities, and they're categorically
+					related as "consensus cleanup." If any fix did become unexpectedly
+					problematic, it could potentially be removed from the bundle before
+					activation. The precedent would be specifically for bundling related
+					security fixes, not for mixing unrelated proposals or features with
+					bug fixes.</p>
+					<p>The Bitcoin community must weigh these tradeoffs and whether the
+					efficiency gains and reduced coordination burden of bundling
+					outweigh the flexibility and governance concerns of separate soft
+					forks for this particular set of fixes.</p>
+				</div>
+			</details>
+
 			<details id="faq-whatif">
 				<summary>What will happen to Bitcoin if we don't do BIP54?</summary>
 				<div>
