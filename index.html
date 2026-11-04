@@ -181,6 +181,14 @@
 							difficulty period must be greater than (or equal to)
 							the timestamp of the first block in the same
 							period.</p>
+							<p>In September 2026, Pieter Wuille <a
+							href="https://delvingbitcoin.org/t/bounds-on-chain-length-with-bip-54-timewarp-fixes/2899">published
+							a proof</a>, machine-checked in Lean, that these two
+							timestamp rules together bound how many blocks can be mined
+							with a given amount of work, limiting the long-term block
+							rate to about one block every 9 minutes 56 seconds. Both
+							rules are needed since dropping either one leaves the bound
+							thousands of times looser.</p>
 							<p>Since in any case, nodes will follow the chain
 							with most cumulative PoW, the attacks above both
 							require 51% control of hashrate. Even if blocks were
@@ -489,7 +497,9 @@
 					Corallo's 2019 proposal</a>. The fixes are now well-understood,
 					narrowly scoped, and have <a
 					href="https://bitcoinops.org/en/newsletters/2025/11/07/#bip54-implementation-and-test-vectors">test
-					vectors and implementation code</a> ready. Waiting longer only
+					vectors and implementation code</a> ready, with a <a
+					href="https://github.com/bitcoin/bitcoin/pull/35793">Bitcoin Core
+					pull request</a> under review. Waiting longer only
 					increases the window during which these vulnerabilities could be
 					exploited.</p>
 				</div>
@@ -518,7 +528,10 @@
 						<li><strong>Timewarp fix:</strong> Only constrains timestamps at
 						difficulty period boundaries. Normal mining operations are
 						unaffected, and the fix includes a grace period as a
-						belt-and-suspenders safety measure.</li>
+						belt-and-suspenders safety measure. Bitcoin Core's block template
+						creation <a
+						href="https://bitcoinops.org/en/newsletters/2026/09/11/#bitcoin-core-35949">has
+						been updated to follow both timestamp rules</a>.</li>
 						<li><strong>Coinbase locktime requirement:</strong> Miners
 						simply set the coinbase locktime field, whose usage is currently
 						unspecified. This change is already implemented in <a
@@ -547,10 +560,36 @@
 						<li><strong>64-byte transaction invalidation:</strong> Some
 						<a href="https://gnusha.org/pi/bitcoindev/UsKuvCXXhSAnNVx5a0K2UfP3srAr3slW9mcOjtYk9LnolaOXfWrW9jpqbxsQQPkyQuZogkhz2Hbfwii2VsTm79vRDpgKduxk35hpBu_t7Do=@protonmail.com/">suggest</a>
 						alternative approaches like introducing a whole new
-						merkle tree that would allow 64-byte transactions. However,
-						these alternatives would require more invasive consensus
-						changes, while the simple ban affects virtually no real-world
-						usage.</li>
+						merkle tree that would allow 64-byte transactions. Jeremy
+						Rubin has argued that 64-byte transactions may have <a
+						href="https://bitcoinops.org/en/newsletters/2026/06/05/#bip54-64-byte-transactions-and-potential-legitimate-uses">legitimate
+						uses</a> and drafted an <a
+						href="https://bitcoinops.org/en/newsletters/2026/07/03/#prohibit-merkle-internal-node-preimages-that-encode-minimal-64-byte-transactions">alternative
+						BIP</a> that would instead invalidate merkle tree internal
+						nodes that look like a 64-byte transaction. The BIP54 authors
+						<a
+						href="https://bitcoinops.org/en/newsletters/2026/07/17/#bips-2208">acknowledge
+						this alternative</a> in the BIP's <a
+						href="https://github.com/bitcoin/bips/blob/master/bip-0054.md#rationale">rationale</a>,
+						which Antoine Poinsot <a
+						href="https://x.com/darosior/status/2080677525647143268">points
+						to</a> as a summary of the options considered, but prefer
+						the simple ban. These alternatives would require more
+						invasive consensus changes or new SPV verifier logic, while
+						the simple ban affects virtually no real-world usage.</li>
+						<li><strong>Timewarp fix and "forward blocks":</strong> Mark
+						Friedenbach <a
+						href="https://groups.google.com/g/bitcoindev/c/CAfm7D5ppjo/m/Jiurx8AiAgAJ">objects</a>
+						that fixing timewarp forecloses <a
+						href="https://freico.in/forward-blocks-scalingbitcoin-paper.pdf">forward
+						blocks</a>, his 2018 on-chain scaling proposal that
+						deliberately relies on the timewarp bug.
+						Antoine Riard <a
+						href="https://groups.google.com/g/bitcoindev/c/T9s8nflvlK0">argued</a>
+						that a similar mechanism would remain possible after BIP54,
+						though far less efficient, and that the forward blocks design
+						is itself unsound because validators would process every
+						transaction twice for the same fee reward.</li>
 					</ul>
 					<p>Overall, BIP54 is considered relatively uncontroversial compared
 					to other soft fork proposals, as it addresses clear vulnerabilities
@@ -626,6 +665,13 @@
 					efficiency gains and reduced coordination burden of bundling
 					outweigh the flexibility and governance concerns of separate soft
 					forks for this particular set of fixes.</p>
+					<p>Jeremy Rubin <a
+					href="https://github.com/bitcoin/bips/pull/2175">proposed</a>
+					splitting BIP54 into one BIP per fix. The BIP54 authors declined to
+					restructure their proposal, and a follow-up PR publishing the fixes
+					as <a href="https://github.com/bitcoin/bips/pull/2177">independent
+					BIPs</a> was closed by the BIP editors as duplicating BIP54 without
+					introducing anything new.</p>
 				</div>
 			</details>
 
@@ -707,6 +753,11 @@
 					more controlled testing environment with <a
 					href="https://bitcoinops.org/en/newsletters/2025/11/07/#bip54-implementation-and-test-vectors">comprehensive
 					test vectors</a> covering all the edge cases.</p>
+					<p>A proposed successor to testnet4, <a
+					href="https://bitcoinops.org/en/newsletters/2026/06/12/#draft-bip-for-testnet5">testnet5</a>
+					(<a href="https://github.com/bitcoin/bips/blob/master/bip-0095.md">BIP95</a>),
+					would remove the 20-minute difficulty exception and enforce all of
+					BIP54's rules from block 1.</p>
 				</div>
 			</details>
 
@@ -772,6 +823,11 @@
 					BIP54 proposes, the community will need to agree on an activation
 					method that balances user activation, miner coordination, and
 					network safety.</p>
+					<p>In October 2026, there was <a
+					href="https://groups.google.com/g/bitcoindev/c/TBBakeBK8_E">discussion</a>
+					on the mailing list about what the next steps toward finalizing
+					BIP54 might be and what a realistic timeline for activation could
+					look like.</p>
 				</div>
 			</details>
 
@@ -785,10 +841,18 @@
 						and provide technical feedback on the <a
 						href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710">Delving
 						Bitcoin thread</a>.</li>
-						<li><strong>Test the implementation:</strong> Run <a
+						<li><strong>Review and test the implementation:</strong> Review
+						<a href="https://github.com/bitcoin/bitcoin/pull/35793">Bitcoin
+						Core PR #35793</a>, or run <a
 						href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">Bitcoin
 						Inquisition</a> on signet and test BIP54's behavior with the
-						provided test vectors.</li>
+						provided test vectors. Implementing the specification in other
+						node software, as <a
+						href="https://github.com/btcsuite/btcd/pull/2537">btcd</a>, <a
+						href="https://github.com/libbitcoin/libbitcoin-system/pull/2149">libbitcoin</a>,
+						and <a
+						href="https://github.com/reardencode/rbitcoin/pull/1173">rbitcoin</a>
+						have done, also helps surface any ambiguities in the BIP.</li>
 						<li><strong>Educate others:</strong> Share information about
 						BIP54's goals and benefits.</li>
 						<li><strong>Miner outreach:</strong> If you operate mining
@@ -808,6 +872,14 @@
 			<h3><a href="#progress" id="progress">In progress</a></h3>
 			<ul>
 				<li>Community review and feedback</li>
+				<li>Review of <a
+				href="https://github.com/bitcoin/bitcoin/pull/35793">Bitcoin Core PR
+				#35793</a>, which implements BIP54's rules without mainnet
+				activation</li>
+				<li>Draft <a href="https://github.com/btcsuite/btcd/pull/2537">btcd
+				implementation</a> of BIP54</li>
+				<li>Draft <a href="https://github.com/reardencode/rbitcoin/pull/1173">rbitcoin
+				implementation</a> of BIP54 on signet</li>
 				<li>Miners decide to implement <a
 				href="https://bnoc.xyz/t/forward-compatible-coinbase-locktimes-for-bip-54/75">forward-compatible
 				coinbase locktimes for BIP54</a> 
@@ -819,16 +891,38 @@
 			<h3><a href="#future" id="future">Future</a></h3>
 			<ul>
 				<li>Soft fork activation parameters</li>
-				<li>Bitcoin Core pull request for BIP54 implementation</li>
+				<li>Merge of the Bitcoin Core BIP54 implementation</li>
 			</ul>
 			<h3><a href="#history" id="history">History</a></h3>
 			<h4>2026</h4>
 			<ul>
-			<li><a href="https://groups.google.com/g/bitcoindev/c/iCuq6bFKt5Y">64-Byte Transactions and Potential Legitimate Uses</a></li>
+			<li><a href="https://github.com/libbitcoin/libbitcoin-system/pull/2149">libbitcoin-system #2149 merges an implementation of BIP54</a></li>
+			<li><a href="https://groups.google.com/g/bitcoindev/c/T9s8nflvlK0">On fixing time-warp and the (unsoundness) of the forward block idea</a></li>
+			<li><a href="https://github.com/reardencode/rbitcoin/pull/1173">rbitcoin #1173 opens a draft implementation of BIP54 on signet</a></li>
+			<li><a href="https://groups.google.com/g/bitcoindev/c/TBBakeBK8_E">Getting BIP54 past the finish line</a></li>
+			<li><a href="https://bitcoinops.org/en/newsletters/2026/10/02/#bounds-on-chain-length-with-bip54-time-warp-fixes">Proof that BIP54's two timestamp rules bound chain length for a given amount of work</a>
+			<ul>
+				<li><a href="https://delvingbitcoin.org/t/bounds-on-chain-length-with-bip-54-timewarp-fixes/2899">Bounds on chain length with BIP-54 timewarp fixes</a> - Delving Bitcoin</li>
+			</ul></li>
+			<li><a href="https://bitcoinops.org/en/newsletters/2026/09/11/#bitcoin-core-35949">Bitcoin Core #35949 updates block template creation to follow BIP54's Murch-Zawy timestamp rule</a></li>
+			<li><a href="https://github.com/bitcoin/bitcoin/pull/35793">Bitcoin Core #35793 opens with an implementation of BIP54 without mainnet activation</a></li>
+			<li><a href="https://bitcoinops.org/en/newsletters/2026/07/17/#bips-2208">BIPs #2208 updates BIP54's rationale with an alternative to invalidating 64-byte transactions</a></li>
+			<li><a href="https://bitcoinops.org/en/newsletters/2026/07/03/#bips-2196">BIPs #2196 merges BIP95, which specifies testnet5 with BIP54 enforced from block 1</a></li>
+			<li><a href="https://bitcoinops.org/en/newsletters/2026/07/03/#prohibit-merkle-internal-node-preimages-that-encode-minimal-64-byte-transactions">Draft BIP proposing an alternative to invalidating 64-byte transactions</a>
+			<ul>
+				<li><a href="https://groups.google.com/g/bitcoindev/c/ZVDEzxG6Sq8">Prohibit Merkle Internal Node Preimages That Encode Minimal 64-Byte Transactions</a> - Bitcoin-Dev mailing list</li>
+			</ul></li>
+			<li><a href="https://github.com/btcsuite/btcd/pull/2537">btcd #2537 opens a draft implementation of BIP54</a></li>
+			<li><a href="https://github.com/bitcoin/bips/pull/2172">BIPs #2172 updates BIP54's status to Complete</a></li>
+			<li><a href="https://bitcoinops.org/en/newsletters/2026/06/05/#bip54-64-byte-transactions-and-potential-legitimate-uses">64-byte transactions and potential legitimate uses</a>
+			<ul>
+				<li><a href="https://groups.google.com/g/bitcoindev/c/iCuq6bFKt5Y">64-Byte Transactions and Potential Legitimate Uses</a> - Bitcoin-Dev mailing list</li>
+			</ul></li>
 			<li><a href="https://groups.google.com/g/bitcoindev/c/wOVjJoLDWfA/m/xV0afQDRAAAJ">Demo of hard to validate blocks on Signet test network</a> 
 			<ul>
 				<li><a href="https://bnoc.xyz/t/slowish-blocks-on-signet/100">Slowish blocks on signet</a> - BNOC</li>
 				<li><a href="https://delvingbitcoin.org/t/consensus-cleanup-demo-of-slow-blocks-on-signet/2367">Consensus Cleanup: demo of slow blocks on Signet</a> - Delving Bitcoin</li>
+				<li><a href="https://bitcoinops.org/en/newsletters/2026/05/01/#bip54-demonstration-of-slow-blocks-on-signet">BIP54 demonstration of slow blocks on signet</a> - Bitcoin Optech</li>
 			</ul></li>
 			<li><a
 			href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">Bitcoin
@@ -956,6 +1050,20 @@
 			<h3><a href="#resources-mailing-list" id="resources-mailing-list">Mailing list posts</a></h3>
 			<ul>
 				<li><a
+				href="https://groups.google.com/g/bitcoindev/c/T9s8nflvlK0">BIP54:
+				On fixing time-warp and the (unsoundness) of the forward block
+				idea</a> (October 2026)</li>
+				<li><a
+				href="https://groups.google.com/g/bitcoindev/c/TBBakeBK8_E">Getting
+				BIP54 past the finish line</a> (October 2026)</li>
+				<li><a
+				href="https://groups.google.com/g/bitcoindev/c/ZVDEzxG6Sq8">Prohibit
+				Merkle Internal Node Preimages That Encode Minimal 64-Byte
+				Transactions</a> (June 2026)</li>
+				<li><a
+				href="https://groups.google.com/g/bitcoindev/c/iCuq6bFKt5Y">64-Byte
+				Transactions and Potential Legitimate Uses</a> (May 2026)</li>
+				<li><a
 				href="https://groups.google.com/g/bitcoindev/c/wOVjJoLDWfA/m/zWcDG7_7CQAJ">BIP
 				54 live on Bitcoin Inquisition</a> (February 2026)</li>
 				<li><a
@@ -992,15 +1100,29 @@
 				href="https://delvingbitcoin.org/t/great-consensus-cleanup-revival/710">Great
 				Consensus Cleanup Revival</a> - Delving Bitcoin</li>
 				<li><a
+				href="https://delvingbitcoin.org/t/bounds-on-chain-length-with-bip-54-timewarp-fixes/2899">Bounds
+				on chain length with BIP-54 timewarp fixes</a> - Delving Bitcoin</li>
+				<li><a
 				href="https://bitcoinops.org/en/topics/consensus-cleanup-soft-fork/">Consensus
 				Cleanup Soft Fork</a> — Bitcoin Optech topic page</li>
 			</ul>
 
 			<h3><a href="#resources-implementation" id="resources-implementation">Implementation</a></h3>
 			<ul>
+				<li><a href="https://github.com/bitcoin/bitcoin/pull/35793">Bitcoin
+				Core PR #35793</a> — BIP54 implementation without mainnet
+				activation</li>
 				<li><a
 				href="https://github.com/bitcoin-inquisition/bitcoin/pull/99">Bitcoin
 				Inquisition PR #99</a> — BIP54 implementation on signet</li>
+				<li><a href="https://github.com/btcsuite/btcd/pull/2537">btcd PR
+				#2537</a> — draft BIP54 implementation</li>
+				<li><a
+				href="https://github.com/libbitcoin/libbitcoin-system/pull/2149">libbitcoin-system
+				PR #2149</a> — BIP54 implementation (merged)</li>
+				<li><a
+				href="https://github.com/reardencode/rbitcoin/pull/1173">rbitcoin PR
+				#1173</a> — draft BIP54 implementation on signet</li>
 			</ul>
 
 			<h3><a href="#resources-stackexchange" id="resources-stackexchange">Bitcoin Stack Exchange</a></h3>
@@ -1035,6 +1157,30 @@
 
 			<h3><a href="#resources-podcasts" id="resources-podcasts">Podcasts & presentations</a></h3>
 			<ul>
+				<li><a
+				href="https://bitcoinops.org/en/podcast/2026/10/06/#bounds-on-chain-length-with-bip54-time-warp-fixes">Bitcoin
+				Optech Newsletter #425 Recap</a> — bounds on chain length with
+				BIP54 timewarp fixes (October 2026)</li>
+				<li><a
+				href="https://bitcoinops.org/en/podcast/2026/09/15/#bitcoin-core-35949">Bitcoin
+				Optech Newsletter #422 Recap</a> — Murch-Zawy rule in Bitcoin Core
+				block templates (September 2026)</li>
+				<li><a
+				href="https://bitcoinops.org/en/podcast/2026/07/21/#bips-2208">Bitcoin
+				Optech Newsletter #414 Recap</a> — BIP54 rationale update on
+				64-byte transaction alternatives (July 2026)</li>
+				<li><a
+				href="https://bitcoinops.org/en/podcast/2026/07/07/#prohibit-merkle-internal-node-preimages-that-encode-minimal-64-byte-transactions">Bitcoin
+				Optech Newsletter #412 Recap</a> — alternative to invalidating
+				64-byte transactions (July 2026)</li>
+				<li><a
+				href="https://bitcoinops.org/en/podcast/2026/06/09/#bip54-64-byte-transactions-and-potential-legitimate-uses">Bitcoin
+				Optech Newsletter #408 Recap</a> — 64-byte transactions and
+				potential legitimate uses (June 2026)</li>
+				<li><a
+				href="https://bitcoinops.org/en/podcast/2026/05/05/#bip54-demonstration-of-slow-blocks-on-signet">Bitcoin
+				Optech Newsletter #403 Recap</a> — demonstration of slow blocks on
+				signet (May 2026)</li>
 				<li><a
 				href="https://bitcoinops.org/en/podcast/2026/02/10/#addressing-remaining-points-on-bip54">Bitcoin
 				Optech Newsletter #391 Recap</a> — addressing remaining points
